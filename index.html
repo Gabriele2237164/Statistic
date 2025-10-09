@@ -96,13 +96,13 @@
     const fileList = document.getElementById("file-list");
 
     const files = [
-      "Homework1.html",
+      "Homework1",
     ];
 
     files.forEach(file => {
       const li = document.createElement("li");
       const a = document.createElement("a");
-      a.href = docsPath + file;
+      a.href = docsPath + file + ".html";
       a.textContent = file;
       li.appendChild(a);
       fileList.appendChild(li);
