@@ -1,0 +1,13 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2865
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 TimesNewRomanPSMT;\f1\fnil\fcharset0 HelveticaNeue;}
+{\colortbl;\red255\green255\blue255;\red22\green22\blue24;}
+{\*\expandedcolortbl;;\cssrgb\c11373\c11373\c12157;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sa428\qc\partightenfactor0
+
+\f0\fs64 \AppleTypeServices\AppleTypeServicesF65539 \cf2 \expnd0\expndtw0\kerning0
+HomeWork 1 - What is statistics, and why can it be useful for cybersecurity?\
+\pard\pardeftab720\qc\partightenfactor0
+
+\f1\fs32 \AppleTypeServices \cf2 Statistics is the science of collecting, analyzing, interpreting, and presenting data. It provides mathematical methods to make sense of data, detect patterns, and make informed decisions, often in situations with uncertainty. Applications in Cybersecurity: Behavioral Analysis: Statistical methods help analyze normal user and network behavior to detect anomalies that may indicate suspicious or malicious activity. Threat Prediction: Techniques like Bayesian analysis and Monte Carlo simulations allow cybersecurity professionals to estimate the probability of potential attacks, helping to anticipate risks. Defense Optimization: By analyzing network traffic, vulnerabilities, and past attacks, statistics helps prioritize security measures and optimize resource allocation. Risk Assessment: Quantitative statistical methods enable organizations to measure, compare, and manage cybersecurity risks effectively. Supporting AI and Machine Learning: Many AI-driven cybersecurity systems, such as intrusion detection systems, rely on statistical algorithms to learn from historical data and detect threats in real time. Conclusion: Statistics is a vital tool in modern cybersecurity. It allows analysts to understand large datasets, identify emerging threats, predict potential attacks, and enhance defenses, ultimately helping protect critical information and infrastructure.}
