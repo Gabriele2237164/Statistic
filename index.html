@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statistic Homework</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f9f9f9;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 600px;
+      margin: 2rem auto;
+    }
+    li {
+      background: white;
+      padding: 1rem;
+      margin-bottom: .5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    }
+    a {
+      text-decoration: none;
+      color: #0073e6;
+    }
+  </style>
+</head>
+<body>
+  <h1>📁 STATISIC HOMEWORK</h1>
+  <ul id="file-list"></ul>
+
+  <script>
+    const docsPath = "docs/";
+    const fileList = document.getElementById("file-list");
+
+    const files = [
+      "file1.pdf",
+      "file2.png"
+    ];
+
+    files.forEach(file => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = docsPath + file;
+      a.textContent = file;
+      li.appendChild(a);
+      fileList.appendChild(li);
+    });
+  </script>
+</body>
+</html>
