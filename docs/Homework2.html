@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Homework 2 - Statistics & Cybersecurity</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -99,6 +101,17 @@
       margin-top: 4rem;
       padding-bottom: 2rem;
     }
+
+    pre {
+      max-height: 300px;
+      overflow-y: auto;
+      background-color: #f0f0f0;
+      padding: 1rem;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
   </style>
 </head>
 <body>
@@ -182,12 +195,27 @@
 
       <div>
         <button onclick="analyzeText()">Analyze Distribution</button>
-        <button onclick="encryptText()">Apply Caeser Cipher</button>
+        <button onclick="encryptText()">Apply Caesar Cipher</button>
         <button onclick="bruteForceDecrypt()">Decode (Brute Force)</button>
         <button onclick="frequencyDecode()">Decode (Frequency Analysis)</button>
       </div>
       
       <pre id="Output"></pre>
+
+      <h2>Functionality explaination</h2>
+      <ul>
+        <li><strong>Analyze Distribution</strong>: this function analyzes the text and computes the frequency distribution of letters (A-Z). It shows how often each letter appears, which is a fundamental concept in statistics and cryptanalysis, as it helps identify patterns and irregularities in the data.</li>
+        <li><strong>Apply Caesar Cipher</strong>: this function encrypts the text using the <strong>Caesar Cipher</strong>, a simple substitution cipher where each letter in the plaintext is shifted by a fixed number of positions in the alphabet. It demonstrates one of the earliest forms of encryption, showing how basic transformations can conceal the original message.</li>
+        <li><strong>Decode (Brute Force)</strong>: this function attemps to decrypt the encrypted text by trying all possible shifts (from 1 to 25). Since Caeser Cipher has only a limited number of possible keys, this brute-force attach can quickly reveal the orignal plaintext.</li>
+        <li><strong>Decode (Frequency Analysis)</strong>: this function decrypts the message by comparing the letter frequency distribution of the encrypted text to that of a known language (e.g. English). It assumes that the most frequent letter in the ciphtertext corresponds to the most frequent letter in the language (often E in English).</li>
+      </ul>
+
+      <h3>⚠️Problems⚠️</h3>
+      <p>When using a simple frequency analysis to decode a Caesar Cipher, the algorithm aften assumes that the most frequent letter in the encrypted text corresponds to the most frequent letter in the target language (for example, "E" in English). However this assumption can fail for short or unbalanced texts, where the most common letter in the message in not actually "E".</p>
+
+      <button onclick="improvedFrequencyDecode()">Decode (Chi-Square Analysis)</button>
+
+      <p>The <strong>Chi-Square analysis</strong> enhances the accuracy of Caesar Chiper decryption by using statistical letter frequency analysis. Instead of assuming that the most frequent letter in the encrypted text corresponds to "E", it tries all possible shifts and compares the observed letter distribution of each decryption with the expected distribution of the language. The shift that produces the lowest Chi-Square values is chosen, yielding a more reliable decryption even for short or unbalanced texts.</p>
 
       <a class="back-button" href="../index.html">← Back</a>
     </div>
@@ -278,6 +306,52 @@
 
       document.getElementById("Output").textContent =
         `Estimated shift: ${shift}\n\nDecrypted text (based on letter frequency):\n\n${decrypted}`;
+    }
+
+    function getFrequency(text) {
+    const freq = {};
+    let total = 0;
+    for (let c of text.toUpperCase()) {
+      if (/[A-Z]/.test(c)) {
+        freq[c] = (freq[c] || 0) + 1;
+        total++;
+      }
+    }
+    for (let c in freq) freq[c] = (freq[c] / total) * 100;
+    return freq;
+  }
+
+    function chiSquareStatistics(observed) {
+      let chi = 0;
+      for (let letter in englishFreq) {
+        const observedFreq = observed[letter] || 0;
+        const expectedFreq = englishFreq[letter];
+        chi += Math.pow(observedFreq - expectedFreq, 2) / expectedFreq;
+      }
+      return chi;
+    }
+
+    function improvedFrequencyDecode() {
+      if (!encryptedText) return alert("Encrypt a text first!");
+
+      let bestShift = 0;
+      let lowestChi = Infinity;
+      let bestDecryption = "";
+
+      for (let shift = 0; shift < 26; shift++) {
+        const decrypted = caesarDecrypt(encryptedText, shift);
+        const freq = getFrequency(decrypted);
+        const chi = chiSquareStatistics(freq);
+
+        if (chi < lowestChi) {
+          lowestChi = chi;
+          bestShift = shift;
+          bestDecryption = decrypted;
+        }
+      }
+
+      document.getElementById("Output").textContent =
+        `Estimated shift: ${bestShift}\nChi-Square value: ${lowestChi.toFixed(2)}\n\nDecrypted text:\n\n${bestDecryption}`;
     }
   </script>
 </body>
