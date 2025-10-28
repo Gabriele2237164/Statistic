@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Homework 3 – RSA & Statistical Cryptanalysis (English)</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+
+  <style> 
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#f5f5f7; color:#1d1d1f; margin:0; padding:0; }
+    header { text-align:center; padding:2rem 1rem; }
+    h1 { margin:0; font-size:1.8rem; }
+    .wrap { max-width:1000px; margin:1rem auto; padding:1rem; }
+    .card { background:#fff; padding:1.5rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:1.5rem; }
+    textarea { width:100%; box-sizing:border-box; padding:0.75rem; border:1px solid #ccc; border-radius:8px; resize:vertical; font-size:1rem; }
+    button { margin:0.5rem 0.2rem; padding:0.6rem 1.2rem; border:none; background:#0b66ff; color:#fff; border-radius:8px; cursor:pointer; font-weight:500; transition:background .25s; }
+    button:hover { background:#005bb5; }
+    pre { background:#f0f0f0; padding:1rem; border-radius:8px; white-space:pre-wrap; overflow-x:auto; max-height:300px; }
+    .info-box { background:#eef2ff; padding:1rem; border-left:4px solid #6366f1; border-radius:8px; margin:1.5rem 0; }
+    .row { display:flex; gap:1rem; flex-wrap:wrap; }
+    .col { flex:1; min-width:280px; }
+    table { width:100%; border-collapse:collapse; margin-top:0.75rem;}
+    th, td { padding:6px 8px; border-bottom:1px solid #eee; font-size:0.95rem; text-align:left; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    footer { text-align:center; margin:2rem 0; font-size:0.9rem; color:#86868b; }
+    canvas { margin-top:1rem; width:100%; height:260px; }
+    .back-button {display: block;text-align: center;width: fit-content;margin: 2rem auto 0;padding: 0.75rem 1.5rem;background-color: #6e6e73;color: #fff;text-decoration: none;font-weight: 500;font-size: 1rem;border-radius: 12px;box-shadow: 0 4px 12px rgba(0,0,0,0.15);transition: all 0.25s ease;}
+    .back-button:hover {background-color: #5e5e63;box-shadow: 0 6px 16px rgba(0,0,0,0.2);transform: translateY(-2px);}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Homework 3 – RSA encode/decode using distribution</h1>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <label for="inputText"><strong>Input text:</strong></label>
+      <textarea id="inputText" rows="5" placeholder="Insert English text here…">Statistical cryptanalysis uses letter-frequency distributions to break substitution ciphers. This exercise demonstrates RSA with small primes and then tries to recover plaintext.</textarea>
+
+      <div>
+        <button id="btnEncrypt">Encrypt (RSA)</button>
+        <button id="btnDecrypt">Decrypt with private key</button>
+        <button id="btnFreq">Attack by frequency mapping</button>
+        <button id="btnHill">Hill-climb mapping improvement</button>
+        <button id="btnClear" style="background:#6e6e73;">Reset output</button>
+      </div>
+
+      <div class="info-box">
+        <strong>RSA parameters (example):</strong>
+        <span id="rsaParams" class="mono"></span>
+      </div>
+
+    </div>
+
+    <div class="row">
+      <div class="col card">
+        <h3>Output / Log</h3>
+        <pre id="Output"></pre>
+      </div>
+      <div class="col card">
+        <h3>Frequencies & Charts</h3>
+        <canvas id="chartPlain"></canvas>
+        <canvas id="chartCipher"></canvas>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col card">
+        <h3>Mapping table</h3>
+        <div id="mappingArea"></div>
+      </div>
+      <div class="col card">
+        <h3>Decoded texts</h3>
+        <div><strong>By frequency mapping:</strong><pre id="decodedFreq"></pre></div>
+        <div><strong>After hill-climb:</strong><pre id="decodedHill"></pre></div>
+        <div><strong>Exact decryption (private key):</strong><pre id="decodedExact"></pre></div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>Button functionalities:</strong>
+      <ul>
+        <li><strong>Encrypt (RSA):</strong> ncrypts the input text using a simplified RSA algorithm with small primes (p=11, q=13). Only letters A–Z are encoded, and the ciphertext is displayed as numerical tokens. This demonstrates how RSA encryption works at a basic level.</li>
+        <li><strong>Decrypt with private key:</strong> Uses the RSA private key to exactly recover the original plaintext from the ciphertext. This shows the principle of RSA decryption when the private key is known.</li>
+        <li><strong>Attack by frequency mapping:</strong> Automatically factors the RSA modulus n, computes the private key d, and decrypts the ciphertext to reveal the exact plaintext. This simulates how RSA can be broken when small primes are used, illustrating the importance of using large primes in practice.</li>
+        <li><strong>Hill-climb mapping improvement:</strong> Performs a heuristic frequency-based decryption of the ciphertext using letter frequencies in English. This provides an approximate decoded text without using the private key, serving as a demonstration of classical statistical attacks on substitution ciphers.</li>
+        <li><strong>Reset output:</strong> Clears all logs, decoded texts, charts, and mappings, resetting the interface for a new test.</li>
+      </ul>
+    </div>
+
+    <a class="back-button" href="../index.html">← Back</a>
+    <footer>© 2025 Gabriele Paladini — All rights reserved.</footer>
+
+  <script>
+    function modPow(base, exp, mod) {
+      base = ((base % mod) + mod) % mod;
+      let result = 1;
+      while (exp > 0) {
+        if (exp & 1) result = (result * base) % mod;
+        base = (base * base) % mod;
+        exp = Math.floor(exp / 2);
+      }
+      return result;
+    }
+
+    function egcd(a, b) {
+      if (b === 0) return [1, 0, a];
+      const [x, y, g] = egcd(b, a % b);
+      return [y, x - Math.floor(a / b) * y, g];
+    }
+
+    function modInv(a, m) {
+      const [x, y, g] = egcd(a, m);
+      if (g !== 1) return null;
+      return (x % m + m) % m;
+    }
+
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const alphaToInt = {};
+    for (let i = 0; i < 26; i++) alphaToInt[alphabet[i]] = i;
+    function letterToNum(ch) {
+      const c = ch.toUpperCase();
+      return alphaToInt.hasOwnProperty(c) ? alphaToInt[c] : null;
+    }
+    function numToLetter(n) {
+      return n >= 0 && n < 26 ? alphabet[n] : "?";
+    }
+
+    const englishFreq = {
+      A:8.167,B:1.492,C:2.782,D:4.253,E:12.702,F:2.228,G:2.015,H:6.094,I:6.966,J:0.153,K:0.772,L:4.025,M:2.406,
+      N:6.749,O:7.507,P:1.929,Q:0.095,R:5.987,S:6.327,T:9.056,U:2.758,V:0.978,W:2.360,X:0.150,Y:1.974,Z:0.074
+    };
+    const englishOrdered = Object.keys(englishFreq).sort((a,b)=>englishFreq[b]-englishFreq[a]);
+
+    const p=11,q=13,n=p*q,phi=(p-1)*(q-1),e=7,d=modInv(e,phi);
+    document.getElementById("rsaParams").textContent=`p=${p}, q=${q}, n=${n}, φ(n)=${phi}, e=${e}, d=${d}`;
+
+    let lastCipherTokens=[];
+
+    function rsaEncryptText(plaintext,eKey,nKey){
+      const clean=plaintext.toUpperCase().replace(/[^A-Z]/g,'');
+      const tokens=[];
+      for(let ch of clean){
+        const m=letterToNum(ch);
+        if(m!==null) tokens.push(String(modPow(m,eKey,nKey)));
+      }
+      return tokens;
+    }
+
+    function rsaDecryptTokens(tokens,dKey,nKey){
+      let out="";
+      for(let tok of tokens){
+        const c=Number(tok);
+        if(!isNaN(c)) out+=numToLetter(modPow(c,dKey,nKey));
+      }
+      return out;
+    }
+
+    function computeLetterFreq(text){
+      const counts={}; let total=0;
+      for(let ch of text){
+        const m=letterToNum(ch);
+        if(m!==null){const L=alphabet[m];counts[L]=(counts[L]||0)+1;total++;}
+      }
+      const dist={}; for(let L of alphabet){dist[L]=((counts[L]||0)/Math.max(1,total))*100;}
+      return {counts,dist,total};
+    }
+
+    function countCipherFreq(tokens){
+      const counts=new Map(); let total=0;
+      for(let tok of tokens){const c=Number(tok);if(!isNaN(c)){counts.set(c,(counts.get(c)||0)+1);total++;}}
+      return {counts,total};
+    }
+
+    function drawBarChart(canvasId, labels, data, title){
+      const ctx=document.getElementById(canvasId).getContext("2d");
+      const cfg={type:"bar",data:{labels,datasets:[{label:title,data,backgroundColor:"rgba(54,162,235,0.6)"}]},options:{scales:{y:{beginAtZero:true}},plugins:{title:{display:true,text:title}}}};
+      return new Chart(ctx,cfg);
+    }
+
+    let chartPlain=null,chartCipher=null;
+
+    document.getElementById("btnEncrypt").addEventListener("click",()=>{
+      const text=document.getElementById("inputText").value;
+      const clean=text.toUpperCase().replace(/[^A-Z]/g,'');
+      const tokens=rsaEncryptText(text,e,n);
+      lastCipherTokens=tokens;
+      const ciphertext=tokens.join(' ');
+      document.getElementById("Output").textContent=`=== CIPHERTEXT ===\n${ciphertext}\n\nClean plaintext:\n${clean}`;
+      const pf=computeLetterFreq(clean);
+      if(chartPlain)chartPlain.destroy();
+      chartPlain=drawBarChart("chartPlain",Object.keys(pf.dist),Object.values(pf.dist),"Plaintext Letter %");
+      const cf=countCipherFreq(tokens);
+      const sorted=Array.from(cf.counts.entries()).sort((a,b)=>a[0]-b[0]);
+      const labels=sorted.map(e=>String(e[0])),values=sorted.map(e=>e[1]);
+      if(chartCipher)chartCipher.destroy();
+      chartCipher=drawBarChart("chartCipher",labels,values,"Cipher Symbol Counts");
+    });
+
+    document.getElementById("btnDecrypt").addEventListener("click",()=>{
+      if(!lastCipherTokens.length)return alert("Please encrypt first.");
+      const plaintext=rsaDecryptTokens(lastCipherTokens,d,n);
+      document.getElementById("decodedExact").textContent=plaintext;
+      document.getElementById("Output").textContent+=`\n=== Decrypted with private key ===\n${plaintext}`;
+    });
+
+    // Attack by frequency mapping (ora integra factoring e calcolo di d)
+    document.getElementById("btnFreq").addEventListener("click",()=>{
+      if(!lastCipherTokens.length)return alert("Please encrypt first.");
+      let fp=null,fq=null;
+      for(let i=2;i<=Math.floor(Math.sqrt(n));i++){if(n%i===0){fp=i;fq=n/i;break;}}
+      if(!fp)return alert("Failed to factor n automatically.");
+      const phiCalc=(fp-1)*(fq-1);
+      const dCalc=modInv(e,phiCalc);
+      const plaintext=rsaDecryptTokens(lastCipherTokens,dCalc,n);
+      document.getElementById("decodedFreq").textContent=plaintext;
+      document.getElementById("decodedExact").textContent=plaintext;
+      document.getElementById("Output").textContent+=`\n-- Auto factoring success (p=${fp}, q=${fq}, d=${dCalc}) --\nExact decrypt:\n${plaintext}`;
+      // mostra tabella mapping c→lettera
+      let html="<table><thead><tr><th>Symbol</th><th>Letter</th></tr></thead><tbody>";
+      for(let c=0;c<n;c++){const m=modPow(c,dCalc,n);if(m>=0&&m<26)html+=`<tr><td class="mono">${c}</td><td>${alphabet[m]}</td></tr>`;}
+      html+="</tbody></table>";
+      document.getElementById("mappingArea").innerHTML=html;
+    });
+
+    // Hill-climb mapping (frequenza pura)
+    document.getElementById("btnHill").addEventListener("click",()=>{
+      if(!lastCipherTokens.length)return alert("Please encrypt first.");
+      const englishFreqOrder="ETAOINSHRDLCUMWFGYPBVKJXQZ".split("");
+      const cf=countCipherFreq(lastCipherTokens);
+      const symbolsSorted=Array.from(cf.counts.entries()).sort((a,b)=>b[1]-a[1]);
+      const usedSymbols=symbolsSorted.map(([sym])=>sym);
+      const mapping=new Map();
+      for(let i=0;i<usedSymbols.length&&i<englishFreqOrder.length;i++){
+        mapping.set(usedSymbols[i],englishFreqOrder[i]);
+      }
+      let guessed="";for(let tok of lastCipherTokens){guessed+=mapping.get(Number(tok))||"?";}
+      let html="<table><thead><tr><th>Symbol</th><th>Guessed letter</th></tr></thead><tbody>";
+      for(let [sym,lt] of mapping.entries()){html+=`<tr><td class="mono">${sym}</td><td>${lt}</td></tr>`;}
+      html+="</tbody></table>";
+      document.getElementById("mappingArea").innerHTML=html;
+      document.getElementById("decodedHill").textContent=guessed;
+      document.getElementById("Output").textContent+=`\n=== Hill-climbing frequency approximation ===\n${guessed}`;
+    });
+
+    document.getElementById("btnClear").addEventListener("click",()=>{
+      document.getElementById("Output").textContent="";
+      document.getElementById("decodedFreq").textContent="";
+      document.getElementById("decodedHill").textContent="";
+      document.getElementById("decodedExact").textContent="";
+      document.getElementById("mappingArea").innerHTML="";
+      if(chartPlain)chartPlain.destroy();
+      if(chartCipher)chartCipher.destroy();
+      lastCipherTokens=[];
+    });
+  </script>
+</body>
+</html>
