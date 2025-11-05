@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Homework 5 – Research on Measures of Location and Dispersion</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>     
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#f5f5f7; color:#1d1d1f; margin:0; padding:0; }
+    header { text-align:center; padding:2rem 1rem; }
+    h1 { margin:0; font-size:1.8rem; }
+    .wrap { max-width:1000px; margin:1rem auto; padding:1rem; }
+    .card { background:#fff; padding:1.5rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:1.5rem; }
+    h2, h3 { color:#1d1d1f; margin-top:1rem; }
+    ul { padding-left:1.25rem; }
+    li { margin-bottom:0.4rem; }
+    p { line-height:1.6; }
+    table { width:100%; border-collapse:collapse; margin-top:0.75rem;}
+    th, td { padding:6px 8px; border-bottom:1px solid #eee; font-size:0.95rem; text-align:left; }
+    th { background:#f8f8fc; font-weight:600; }
+    .info-box { background:#eef2ff; padding:1rem; border-left:4px solid #6366f1; border-radius:8px; margin:1.5rem 0; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background:#f0f0f0; padding:2px 4px; border-radius:4px; }
+    .subpoint { margin-left:1rem; display:block; }
+    .formula { margin: 0.5rem 0 0.5rem 1.5rem; font-size: 1rem; }
+    .back-button {display: block;text-align: center;width: fit-content;margin: 2rem auto 0;padding: 0.75rem 1.5rem;background-color: #6e6e73;color: #fff;text-decoration: none;font-weight: 500;font-size: 1rem;border-radius: 12px;box-shadow: 0 4px 12px rgba(0,0,0,0.15);transition: all 0.25s ease;}
+    .back-button:hover {background-color: #5e5e63;box-shadow: 0 6px 16px rgba(0,0,0,0.2);transform: translateY(-2px);}
+    footer { text-align:center; margin:2rem 0; font-size:0.9rem; color:#86868b; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Homework 5 – Research on Measures of Location and Dispersion</h1>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>1. Research Task – Uses, Advantages, and Limitations of Location and Dispersion Measures</h2>
+
+      <p>
+        Measures of <strong>location</strong> (central tendency) and <strong>dispersion</strong> (variability)
+        are fundamental tools in descriptive and inferential statistics. They provide complementary insights:
+        location measures identify a typical or central value, while dispersion measures describe the spread of data around it.
+        Understanding both is essential for accurate interpretation, meaningful comparisons, and sound decision-making.
+      </p>
+
+      <h3>1.1 Arithmetic Mean</h3>
+      <div class="formula">$$ \bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i $$</div>
+      <p>
+        <span class="subpoint"><b>Use:</b> Represents the “balance point” of a dataset and serves as a foundation for most statistical models, including regression, ANOVA, and probabilistic estimation.</span>
+        <span class="subpoint"><b>Advantages:</b> Simple to calculate, uses every data point, and allows for algebraic manipulation.</span>
+        <span class="subpoint"><b>Limitations:</b> Highly sensitive to outliers and skewed distributions, making it less reliable for non-normal data.</span>
+        <span class="subpoint"><b>Example:</b> In analyzing average income, extreme values can inflate the mean, whereas the median provides a more accurate representation.</span>
+      </p>
+
+      <h3>1.2 Median</h3>
+      <div class="formula">
+        For ordered data \( x_{(1)} \le x_{(2)} \le ... \le x_{(n)} \):  
+        $$ \tilde{x} = 
+        \begin{cases}
+        x_{(\frac{n+1}{2})}, & \text{if } n \text{ is odd} \\
+        \frac{x_{(\frac{n}{2})} + x_{(\frac{n}{2}+1)}}{2}, & \text{if } n \text{ is even}
+        \end{cases} $$
+      </div>
+      <p>
+        <span class="subpoint"><b>Use:</b> Suitable for ordinal or skewed data distributions and commonly used in economics and social sciences.</span>
+        <span class="subpoint"><b>Advantages:</b> Robust to extreme values and outliers; provides a stable measure for asymmetric data.</span>
+        <span class="subpoint"><b>Limitations:</b> Does not reflect the magnitude of all deviations and cannot be used in algebraic computations.</span>
+        <span class="subpoint"><b>Example:</b> Median house prices are preferred in real estate analytics because they are not distorted by exceptionally high or low property values.</span>
+      </p>
+
+      <h3>1.3 Mode</h3>
+      <p>
+        <span class="subpoint"><b>Use:</b> Identifies the most frequently occurring value and is the only central measure suitable for categorical data.</span>
+        <span class="subpoint"><b>Advantages:</b> Simple and intuitive; applicable to non-numeric data.</span>
+        <span class="subpoint"><b>Limitations:</b> May be non-unique or undefined in continuous distributions; provides limited information about variability.</span>
+        <span class="subpoint"><b>Example:</b> Commonly used in market research to identify the most popular product choice or customer preference.</span>
+      </p>
+
+      <h3>1.4 Variance and Standard Deviation</h3>
+      <div class="formula">
+        Variance: $$ s^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2 $$
+        <br>
+        Standard Deviation: $$ s = \sqrt{s^2} $$
+      </div>
+      <p>
+        <span class="subpoint"><b>Use:</b> Quantify variability within a dataset. Essential in inferential statistics, quality control, and finance.</span>
+        <span class="subpoint"><b>Advantages:</b> Strong mathematical foundation; allows analytical operations and probabilistic modeling.</span>
+        <span class="subpoint"><b>Limitations:</b> Sensitive to outliers and assumes normality for proper interpretation. Variance’s squared units make it less intuitive.</span>
+        <span class="subpoint"><b>Example:</b> SD is used to measure financial risk (volatility); however, it underrepresents risk in heavy-tailed distributions.</span>
+      </p>
+
+      <h3>1.5 Interquartile Range (IQR) and Median Absolute Deviation (MAD)</h3>
+      <div class="formula">
+        IQR: $$ IQR = Q_3 - Q_1 $$  
+        MAD: $$ MAD = median(|x_i - \tilde{x}|) $$
+      </div>
+      <p>
+        <span class="subpoint"><b>Use:</b> Provide robust alternatives to variance for non-normal data.</span>
+        <span class="subpoint"><b>Advantages:</b> Resistant to outliers and ideal for skewed distributions.</span>
+        <span class="subpoint"><b>Limitations:</b> Less sensitive to tail behavior and less efficient for normally distributed data.</span>
+        <span class="subpoint"><b>Example:</b> Used in boxplots and robust ML algorithms to summarize data spread without being affected by outliers.</span>
+      </p>
+
+      <h3>1.6 Coefficient of Variation (CV)</h3>
+      <div class="formula">$$ CV = \frac{s}{\bar{x}} \times 100\% $$</div>
+      <p>
+        <span class="subpoint"><b>Use:</b> Expresses relative variability as a proportion of the mean, useful for comparing data on different scales.</span>
+        <span class="subpoint"><b>Advantages:</b> Dimensionless and scale-independent.</span>
+        <span class="subpoint"><b>Limitations:</b> Unreliable when the mean approaches zero or when data includes negative values.</span>
+        <span class="subpoint"><b>Example:</b> Used in biology to compare variability across experiments with different measurement units.</span>
+      </p>
+
+      <h3>1.7 Practical Applications</h3>
+      <ul>
+        <li><b>Economics and Finance:</b> Mean and SD are used for portfolio risk and return analysis; median and IQR for robust financial indicators.</li>
+        <li><b>Engineering:</b> Variance and SD guide process control and reliability studies; IQR detects process deviations.</li>
+        <li><b>Social Sciences:</b> Median and percentiles summarize skewed survey data; mode identifies common categorical responses.</li>
+        <li><b>Biology and Environmental Studies:</b> CV compares variability across ecosystems or experimental trials with different units.</li>
+        <li><b>Machine Learning:</b> Variance and SD inform feature scaling; IQR is used in outlier detection and robust preprocessing.</li>
+      </ul>
+
+      <h3>1.8 Computational and Numerical Aspects</h3>
+      <p>
+        Traditional “batch” algorithms that recompute mean and variance from all data points are computationally inefficient
+        and prone to numerical instability (e.g., rounding errors, overflow, and catastrophic cancellation).
+        Modern analytics employ <b>online algorithms</b> such as <b>Welford’s method</b>, which updates mean and variance incrementally:
+      </p>
+      <div class="formula">
+        $$ 
+        \begin{aligned}
+        \bar{x}_n &= \bar{x}_{n-1} + \frac{x_n - \bar{x}_{n-1}}{n} \\
+        M_{2,n} &= M_{2,n-1} + (x_n - \bar{x}_{n-1})(x_n - \bar{x}_n)
+        \end{aligned}
+        $$
+      </div>
+
+      <div class="info-box">
+        <strong>Conclusion:</strong><br>
+        Measures of central tendency and dispersion are interdependent: a dataset’s center is meaningful only when interpreted
+        with its spread, and vice versa. The mean and standard deviation are optimal for normal distributions,
+        whereas the median and IQR are preferred for skewed or contaminated data.
+        Choosing the right combination ensures statistical accuracy and robustness across diverse real-world applications.
+      </div>
+
+      <p><b>Sources:</b> NIST/SEMATECH e-Handbook of Statistical Methods, Investopedia, DataCamp, Wikipedia,
+      and academic literature on statistical robustness and numerical stability.</p>
+    </div>
+  </div>
+
+  <a class="back-button" href="../index.html">← Back</a>
+
+  <footer>
+    © 2025 Gabriele Paladini — All rights reserved.
+  </footer>
+</body>
+</html>
