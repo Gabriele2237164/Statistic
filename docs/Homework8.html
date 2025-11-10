@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Homework 8 – Bernoulli Processes, Random Walks, and Binomial Structures</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#f5f5f7; color:#1d1d1f; margin:0; padding:0; line-height:1.6; }
+    header { text-align:center; padding:2rem 1rem; }
+    h1 { font-size:1.9rem; margin-bottom:0.5rem; }
+    h2 { color:#0b66ff; margin-top:1.5rem; }
+    p { margin-top:0.75rem; }
+    .card { background:#fff; padding:1.5rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin:1rem auto; max-width:900px; }
+    .info-box { background:#eef2ff; padding:1rem; border-left:4px solid #6366f1; border-radius:8px; margin:1.5rem 0; }
+    footer { text-align:center; margin:2rem 0; font-size:0.9rem; color:#86868b; }
+    ul { margin-top:0.5rem; }
+    table { border-collapse: collapse; margin:1rem auto; }
+    td { border:1px solid #ccc; padding:4px 8px; text-align:center; min-width:30px; }
+    .back-button {display: block;text-align: center;width: fit-content;margin: 2rem auto 0;padding: 0.75rem 1.5rem;background-color: #6e6e73;color: #fff;text-decoration: none;font-weight: 500;font-size: 1rem;border-radius: 12px;box-shadow: 0 4px 12px rgba(0,0,0,0.15);transition: all 0.25s ease;}
+    .back-button:hover {background-color: #5e5e63;box-shadow: 0 6px 16px rgba(0,0,0,0.2);transform: translateY(-2px);}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Homework 8 – Compare Bernoullli process with Random walk, visual properties, Binomial Coefficients, Tartaglia, Fibonacci, etc.</h1>
+  </header>
+
+  <div class="card">
+    <h2>1. Conceptual Overview</h2>
+    <p>
+      Both the <strong>Law of Large Numbers (LLN)</strong> and the <strong>Random Walk</strong> simulations share a common probabilistic foundation: they arise from sequences of <strong>Bernoulli trials</strong>.
+      A Bernoulli process consists of a set of independent experiments, each yielding only two possible outcomes — typically denoted as success (1) or failure (0), with constant probability <em>p</em> of success.
+    </p>
+    <p>
+      In the LLN, we observe how the <em>relative frequency</em> of successes over <em>n</em> trials, defined as 
+      <em>f(n) = (ΣX<sub>i</sub>)/n</em>, converges towards the true probability <em>p</em> as the number of observations increases.
+      In contrast, the Random Walk simulation transforms these same outcomes into cumulative steps, assigning <em>+1</em> for a success and <em>−1</em> for a failure.
+      This leads to the cumulative score:
+      <p style="text-align:center; font-style:italic;">S(n) = Σ (2X<sub>i</sub> − 1)</p>
+    </p>
+    <p>
+      Both perspectives, though different in focus — one on convergence, the other on distribution — describe the evolution of a stochastic process built upon the same elementary Bernoulli mechanism.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>2. Shared Mathematical Framework</h2>
+    <p>
+      In both experiments, the underlying distribution governing the number of successes in <em>n</em> trials is the <strong>binomial distribution</strong>:
+      <em>P(X = k) = C(n,k) p<sup>k</sup> (1−p)<sup>n−k</sup></em>.
+      Here, <em>C(n,k)</em> represents the number of possible combinations of <em>k</em> successes among <em>n</em> trials.
+    </p>
+    <p>
+      In the LLN, this distribution governs how the empirical frequency <em>f(n)</em> fluctuates around the true probability <em>p</em> and gradually stabilizes with larger <em>n</em>.
+      In the Random Walk, the same combinatorial structure defines the probabilities of achieving a final score <em>S = 2k − n</em>, showing how the empirical histogram converges toward the theoretical binomial curve.
+    </p>
+    <p>
+      The deep analogy lies in how <strong>statistical regularity</strong> (LLN) and <strong>probabilistic symmetry</strong> (Random Walk) are both consequences of binomially distributed discrete events.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>3. Pascal’s Triangle and Combinatorial Symmetry</h2>
+    <p>
+      The <strong>Pascal’s Triangle</strong> elegantly encodes all <em>binomial coefficients</em> <em>C(n,k)</em>, where each entry equals the sum of the two entries above it:
+      <em>C(n,k) = C(n−1,k−1) + C(n−1,k)</em>.
+      This recursive property mirrors the branching structure of all possible random walk trajectories, where each node represents a partial sum, and each step bifurcates into success or failure.
+    </p>
+    <p>
+      The triangle also reveals the intrinsic <strong>symmetry</strong> of the binomial coefficients:
+      <em>C(n,k) = C(n,n−k)</em>.
+      In probabilistic terms, this symmetry reflects that the likelihood of obtaining <em>k</em> successes equals that of obtaining <em>k</em> failures when <em>p = 0.5</em> — the case of a perfectly symmetric random walk.
+    </p>
+
+    <div id="pascal"></div>
+
+    <script>
+      const container = document.getElementById('pascal');
+      const n = 9;
+      const table = document.createElement('table');
+      for (let i=0; i<=n; i++) {
+        const row = document.createElement('tr');
+        for (let k=0; k<=i; k++) {
+          const cell = document.createElement('td');
+          if (k === 0 || k === i) cell.textContent = 1;
+          else {
+            const aboveLeft = parseInt(table.rows[i-1].cells[k-1].textContent);
+            const above = parseInt(table.rows[i-1].cells[k].textContent);
+            cell.textContent = aboveLeft + above;
+          }
+          row.appendChild(cell);
+        }
+        table.appendChild(row);
+      }
+      container.appendChild(table);
+    </script>
+  </div>
+
+  <div class="card">
+    <h2>4. The Binomial Expansion and Its Probabilistic Meaning</h2>
+    <p>
+      The <strong>binomial theorem</strong> provides the algebraic expansion:
+      <em>(a + b)<sup>n</sup> = Σ C(n,k) a<sup>n−k</sup> b<sup>k</sup></em>.
+      This expression not only defines the coefficients found in Pascal’s Triangle, but also forms the mathematical backbone of the binomial probability law.
+    </p>
+    <p>
+      By identifying <em>a = (1−p)</em> and <em>b = p</em>, we can rewrite:
+      <em>(1−p + p)<sup>n</sup> = Σ C(n,k) p<sup>k</sup>(1−p)<sup>n−k</sup> = 1</em>.
+      This identity reflects the fact that the total probability across all possible outcomes in <em>n</em> Bernoulli trials equals one — a direct link between algebraic and probabilistic completeness.
+    </p>
+    <p>
+      Moreover, in random walks, this expansion symbolically represents all possible “paths” that a walker may take, each weighted by its probability.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>5. Fibonacci Sequence and Recursive Relationships</h2>
+    <p>
+      The <strong>Fibonacci sequence</strong>, though seemingly unrelated, emerges naturally from Pascal’s Triangle.  
+      The sum of numbers along the shallow diagonals produces the Fibonacci numbers:
+      1, 1, 2, 3, 5, 8, 13, 21, and so on.
+    </p>
+    <p>
+      This connection emphasizes the shared recursive nature of both systems.  
+      In a random walk, each position depends only on the previous step — a recursion of state probabilities identical in spirit to how Fibonacci numbers depend on their two preceding terms.
+    </p>
+    <p>
+      Thus, both Fibonacci recursion and Bernoulli processes illustrate a universal mathematical principle: complex structures can emerge from simple iterative rules.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>6. Broader Interpretations and Theoretical Insights</h2>
+    <p>
+      The connection between LLN and Random Walks extends beyond numerical simulation.  
+      It highlights how randomness, when observed in aggregate, reveals stable, predictable patterns governed by combinatorial symmetry.
+      Both experiments exemplify the transition from <strong>microscopic uncertainty</strong> to <strong>macroscopic regularity</strong>.
+    </p>
+    <p>
+      The LLN focuses on long-term convergence — showing that relative frequencies stabilize toward theoretical probabilities.  
+      The Random Walk focuses on probabilistic geometry — showing how cumulative paths form a distribution that converges to the binomial (and, in the limit, to the normal) distribution.
+    </p>
+    <p>
+      Together, they illustrate the essence of probability theory: even when each trial is random, the ensemble behavior obeys precise mathematical laws.
+    </p>
+  </div>
+
+  <div class="info-box">
+    <h2>7. Comparative Summary</h2>
+    <ul>
+      <li><strong>Common Foundation:</strong> Both models originate from repeated Bernoulli trials.</li>
+      <li><strong>Outcome Measure:</strong> LLN studies relative frequencies; Random Walks study cumulative sums.</li>
+      <li><strong>Distributional Core:</strong> Both are governed by the binomial distribution and its coefficients.</li>
+      <li><strong>Combinatorial Structure:</strong> Pascal’s Triangle mirrors possible paths of random evolution.</li>
+      <li><strong>Analytic Expression:</strong> The binomial expansion connects algebraic form and probability.</li>
+      <li><strong>Recursive Patterns:</strong> Fibonacci numbers and other combinatorial sequences emerge from the same recursive structure.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>8. Final Considerations</h2>
+    <p>
+      The study of the Law of Large Numbers and the Random Walk demonstrates that probability theory, combinatorics, and algebra are not isolated branches of mathematics, but deeply interconnected.
+      Through simple binary experiments, we observe the emergence of fundamental mathematical laws: convergence, symmetry, recursion, and structure.
+    </p>
+    <p>
+      The binomial coefficients serve as a bridge across these domains — counting possibilities, shaping probability distributions, and encoding recursive relationships that extend into fields such as statistics, computer science, and cryptography.
+    </p>
+    <p>
+      In essence, both experiments — one focused on convergence, the other on distribution — reflect the same universal truth:  
+      randomness, when structured and observed through the lens of combinatorics, reveals an elegant mathematical order underlying apparent chaos.
+    </p>
+  </div>
+
+  <a class="back-button" href="../index.html">← Back</a>
+
+  <footer>
+    © 2025 Gabriele Paladini — All rights reserved.
+  </footer>
+</body>
+</html>
