@@ -120,7 +120,6 @@
     let chartWalks = null;
     let chartHist = null;
 
-    // --- Simulate m trajectories of random walk with breach probability p ---
     function simulateWalks(p, m, n){
       const trajectories = [];
       for(let i=0; i<m; i++){
@@ -136,12 +135,11 @@
       return trajectories;
     }
 
-    // --- Compute histogram of final scores ---
     function createHistogram(finalScores){
       const min = Math.min(...finalScores);
       const max = Math.max(...finalScores);
       const range = [];
-      for(let v=min; v<=max; v+=2) range.push(v); // step difference is 2
+      for(let v=min; v<=max; v+=2) range.push(v);
       const counts = new Array(range.length).fill(0);
       for(let s of finalScores){
         const idx = (s - min)/2;
@@ -150,11 +148,10 @@
       return {labels: range, counts};
     }
 
-    // --- Compute theoretical binomial probabilities for comparison ---
     function binomialProb(n, p, scoreValues){
       const probs = [];
       for(let s of scoreValues){
-        const x = (s + n)/2; // secure weeks
+        const x = (s + n)/2;
         if(x < 0 || x > n || x % 1 !== 0){ probs.push(0); continue; }
         const comb = factorial(n)/(factorial(x)*factorial(n-x));
         const prob = comb * Math.pow(1-p, x) * Math.pow(p, n-x);
@@ -170,7 +167,6 @@
       return res;
     }
 
-    // --- Main simulation trigger ---
     document.getElementById('btnRunSim').addEventListener('click', ()=>{
       const p = parseFloat(document.getElementById('probP').value);
       const m = parseInt(document.getElementById('numM').value);
@@ -178,7 +174,6 @@
 
       const walks = simulateWalks(p, m, n);
 
-      // Trajectory datasets
       const datasets = walks.map((arr,i)=>({
         label:`Trajectory ${i+1}`,
         data: arr,
@@ -188,7 +183,6 @@
         fill:false
       }));
 
-      // Draw trajectories
       const ctxW = document.getElementById('chartWalks').getContext('2d');
       if(chartWalks) chartWalks.destroy();
       chartWalks = new Chart(ctxW, {
@@ -207,7 +201,6 @@
         }
       });
 
-      // Final scores distribution
       const finalScores = walks.map(arr => arr[arr.length - 1]);
       const hist = createHistogram(finalScores);
       const theoretical = binomialProb(n, p, hist.labels);
