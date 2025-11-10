@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Homework 1 – Random Walk & Binomial Convergence</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#f5f5f7; color:#1d1d1f; margin:0; padding:0; }
+    header { text-align:center; padding:2rem 1rem; }
+    h1 { margin:0; font-size:1.8rem; }
+    .card { background:#fff; padding:1.5rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:1.5rem; }
+    button { margin:0.5rem 0.2rem; padding:0.6rem 1.2rem; border:none; background:#0b66ff; color:#fff; border-radius:8px; cursor:pointer; font-weight:500; transition:background .25s; }
+    button:hover { background:#005bb5; }
+    .info-box { background:#eef2ff; padding:1rem; border-left:4px solid #6366f1; border-radius:8px; margin:1.5rem 0; }
+    .row { display:flex; gap:1rem; flex-wrap:wrap; }
+    .col { flex:1; min-width:280px; }
+    canvas { margin-top:1rem; width:100%; height:260px; }
+    footer { text-align:center; margin:2rem 0; font-size:0.9rem; color:#86868b; }
+    .back-button {display: block;text-align: center;width: fit-content;margin: 2rem auto 0;padding: 0.75rem 1.5rem;background-color: #6e6e73;color: #fff;text-decoration: none;font-weight: 500;font-size: 1rem;border-radius: 12px;box-shadow: 0 4px 12px rgba(0,0,0,0.15);transition: all 0.25s ease;}
+    .back-button:hover {background-color: #5e5e63;box-shadow: 0 6px 16px rgba(0,0,0,0.2);transform: translateY(-2px);}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Homework 7 – Penetration score process simulation (Random Walk)</h1>
+  </header>
+
+  <div class="info-box">
+    <h3>Exercise Exaplaination</h3>
+    <p>
+      This experiment models the <strong>weekly security state</strong> of a server under attack by <em>m</em> independent adversaries across <em>n</em> weeks.  
+      Each week the server can remain secure (<strong>+1</strong>) or be breached (<strong>−1</strong>) with probability <em>p</em>.  
+      Each trajectory is therefore a <strong>random walk</strong> of length <em>n</em>.
+    </p>
+    <p>
+      After <em>n</em> weeks, the final score of a trajectory corresponds to the cumulative sum of these ±1 outcomes.  
+      If we let <em>X</em> denote the number of secure weeks (<em>X ∼ Binomial(n, 1−p)</em>), the total score is:
+    </p>
+    <p style="text-align:center; font-style:italic;">S = 2X − n</p>
+    <p>
+      As <em>n</em> and <em>m</em> increase, the empirical distribution of <em>S</em> converges to the theoretical <strong>binomial distribution</strong>, which describes the probability of observing a certain number of secure weeks out of <em>n</em> independent trials.
+    </p>
+  </div>
+
+  <div class="info-box">
+    <h3>Random Walks</h3>
+    <p>
+      A <strong>random walk</strong> is a process describing a path consisting of successive random steps.  
+      In one dimension, the walker starts at zero and at each time step moves either +1 or −1 with given probabilities.  
+      Random walks are a fundamental model in probability theory and appear in many domains such as finance, physics, and cryptography.
+    </p>
+    <p>
+      In this assignment, each server trajectory corresponds to such a random walk, where remaining secure is a step forward (+1) and being breached is a step backward (−1).  
+      The cumulative score over time represents the walker's position after <em>n</em> steps.
+    </p>
+  </div>
+
+  <div class="info-box">
+    <h3>Theoretical Binomial Distribution</h3>
+    <p>
+      The <strong>binomial distribution</strong> models the number of successes <em>X</em> in <em>n</em> independent Bernoulli trials, each with success probability <em>q = 1−p</em>.  
+      Its probability mass function is:
+    </p>
+    <p style="text-align:center; font-style:italic;">
+      P(X = k) = C(n, k) · q<sup>k</sup> · (1−q)<sup>n−k</sup>
+    </p>
+    <p>
+      In our context, each “success” corresponds to a secure week.  
+      Since the total score <em>S</em> depends linearly on <em>X</em> through the transformation <em>S = 2X − n</em>, the distribution of <em>S</em> inherits the shape of a binomial law, centered around its expected value
+      <em>E[S] = n·(1−2p)</em> and with variance <em>Var[S] = 4n·p·(1−p)</em>.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Random Walk Simulation</h2>
+    <label>Probability of breach p: <input id="probP" type="number" step="0.01" value="0.3" min="0" max="1"></label>
+    <label>Number of attackers (trajectories) m: <input id="numM" type="number" value="100" min="1"></label>
+    <label>Number of weeks n: <input id="numN" type="number" value="50" min="1"></label>
+    <button id="btnRunSim">Run Simulation</button>
+  </div>
+
+  <div class="row">
+    <div class="col card">
+      <h3>Random Walk Trajectories</h3>
+      <canvas id="chartWalks"></canvas>
+    </div>
+    <div class="col card">
+      <h3>Final Scores Distribution</h3>
+      <canvas id="chartHist"></canvas>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p>
+      The simulation confirms that as the number of weeks (<em>n</em>) and the number of attackers (<em>m</em>) increase,  
+      the empirical distribution of the server’s final scores <em>S</em> closely approximates the theoretical binomial distribution.  
+      This convergence demonstrates the link between discrete random walks and binomial probability models.
+    </p>
+    <p>
+      In practical terms, when <em>p</em> is small (high server reliability), the trajectories drift upward, indicating positive cumulative security.  
+      When <em>p</em> is large (frequent breaches), the walks drift downward.  
+      Around <em>p = 0.5</em>, the process behaves like a symmetric random walk centered near zero.
+    </p>
+    <p>
+      These dynamics illustrate how probabilistic models can capture security behavior over time,  
+      offering an analytical foundation for understanding variability and expected outcomes in cybersecurity systems.
+    </p>
+  </div>
+
+  <a class="back-button" href="../index.html">← Back</a>
+
+  <footer>
+    © 2025 Gabriele Paladini — All rights reserved.
+  </footer>
+
+  <script>
+    let chartWalks = null;
+    let chartHist = null;
+
+    // --- Simulate m trajectories of random walk with breach probability p ---
+    function simulateWalks(p, m, n){
+      const trajectories = [];
+      for(let i=0; i<m; i++){
+        let score = 0;
+        const path = [];
+        for(let t=1; t<=n; t++){
+          const breach = Math.random() < p ? -1 : 1;
+          score += breach;
+          path.push(score);
+        }
+        trajectories.push(path);
+      }
+      return trajectories;
+    }
+
+    // --- Compute histogram of final scores ---
+    function createHistogram(finalScores){
+      const min = Math.min(...finalScores);
+      const max = Math.max(...finalScores);
+      const range = [];
+      for(let v=min; v<=max; v+=2) range.push(v); // step difference is 2
+      const counts = new Array(range.length).fill(0);
+      for(let s of finalScores){
+        const idx = (s - min)/2;
+        counts[idx]++;
+      }
+      return {labels: range, counts};
+    }
+
+    // --- Compute theoretical binomial probabilities for comparison ---
+    function binomialProb(n, p, scoreValues){
+      const probs = [];
+      for(let s of scoreValues){
+        const x = (s + n)/2; // secure weeks
+        if(x < 0 || x > n || x % 1 !== 0){ probs.push(0); continue; }
+        const comb = factorial(n)/(factorial(x)*factorial(n-x));
+        const prob = comb * Math.pow(1-p, x) * Math.pow(p, n-x);
+        probs.push(prob);
+      }
+      return probs;
+    }
+
+    function factorial(num){
+      if(num === 0 || num === 1) return 1;
+      let res = 1;
+      for(let i=2; i<=num; i++) res *= i;
+      return res;
+    }
+
+    // --- Main simulation trigger ---
+    document.getElementById('btnRunSim').addEventListener('click', ()=>{
+      const p = parseFloat(document.getElementById('probP').value);
+      const m = parseInt(document.getElementById('numM').value);
+      const n = parseInt(document.getElementById('numN').value);
+
+      const walks = simulateWalks(p, m, n);
+
+      // Trajectory datasets
+      const datasets = walks.map((arr,i)=>({
+        label:`Trajectory ${i+1}`,
+        data: arr,
+        borderColor:'rgba(0,100,255,0.25)',
+        borderWidth:1,
+        pointRadius:0,
+        fill:false
+      }));
+
+      // Draw trajectories
+      const ctxW = document.getElementById('chartWalks').getContext('2d');
+      if(chartWalks) chartWalks.destroy();
+      chartWalks = new Chart(ctxW, {
+        type:'line',
+        data:{
+          labels:Array.from({length:n},(_,i)=>i+1),
+          datasets
+        },
+        options:{
+          responsive:true,
+          plugins:{title:{display:true,text:`Random Walks over ${n} weeks (p=${p})`}, legend:{display:false}},
+          scales:{
+            y:{title:{display:true,text:'Cumulative Score S(n)'}},
+            x:{title:{display:true,text:'Week number'}}
+          }
+        }
+      });
+
+      // Final scores distribution
+      const finalScores = walks.map(arr => arr[arr.length - 1]);
+      const hist = createHistogram(finalScores);
+      const theoretical = binomialProb(n, p, hist.labels);
+      const totalEmpirical = hist.counts.reduce((a,b)=>a+b,0);
+      const theoreticalScaled = theoretical.map(v=>v*totalEmpirical);
+
+      const ctxH = document.getElementById('chartHist').getContext('2d');
+      if(chartHist) chartHist.destroy();
+      chartHist = new Chart(ctxH,{
+        type:'bar',
+        data:{
+          labels:hist.labels.map(String),
+          datasets:[
+            {label:'Empirical Counts', data:hist.counts, backgroundColor:'rgba(255,99,132,0.6)'},
+            {label:'Theoretical Binomial', data:theoreticalScaled, type:'line', borderColor:'rgba(0,0,0,0.85)', borderWidth:2, fill:false, pointRadius:2}
+          ]
+        },
+        options:{
+          responsive:true,
+          plugins:{title:{display:true,text:'Empirical vs Theoretical Distribution of Final Scores'}},
+          scales:{
+            y:{title:{display:true,text:'Count / Probability (scaled)'}},
+            x:{title:{display:true,text:'Final Score S'}}
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
