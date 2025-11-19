@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Probability Theory — Interpretations, Axioms & Measure-Theoretic Foundations</title>
+
+  <script>
+    window.MathJax = { tex: { inlineMath: [['\\(','\\)']] } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#f5f5f7; color:#1d1d1f; margin:0; padding:0; line-height:1.6; }
+    header { text-align:center; padding:2rem 1rem; }
+    h1 { font-size:1.8rem; margin:0; }
+    .wrap { max-width:980px; margin:1rem auto; padding:1rem; }
+    .card { background:#fff; padding:1.4rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.06); margin-bottom:1.25rem; }
+    .info-box { background:#eef2ff; padding:1rem; border-left:4px solid #6366f1; border-radius:8px; margin:1rem 0; }
+    h2 { color:#0b66ff; margin-top:0; }
+    pre { background:#f8fafc; padding:0.8rem; border-radius:8px; overflow:auto; }
+    code { background:#f3f4f6; padding:0.1rem 0.35rem; border-radius:4px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    ul { margin-left:1rem; }
+    ol { margin-left:1.2rem; }
+    .math { font-style:italic; background:#fff; padding:0.15rem 0.3rem; border-radius:4px; border:1px solid #eee; display:inline-block; }
+    .proof { background:#fff; padding:0.8rem; border-radius:8px; border-left:4px solid #d1fae5; }
+    .back-button {display: block;text-align: center;width: fit-content;margin: 1.5rem auto 0;padding: 0.65rem 1.2rem;background-color: #6e6e73;color: #fff;text-decoration: none;font-weight: 500;font-size: 0.95rem;border-radius: 10px;box-shadow: 0 4px 12px rgba(0,0,0,0.12);transition: all 0.2s ease;}
+    .back-button:hover {transform: translateY(-2px); background-color:#5e5e63;}
+    footer { text-align:center; margin:2rem 0; font-size:0.9rem; color:#6b6b70; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Homework9: Interpretations, Axioms & Measure-Theoretic Foundations</h1>
+  </header>
+
+  <div class="wrap">
+
+    <div class="card">
+      <h2>1. Main interpretations of probability (survey)</h2>
+
+      <div class="info-box">
+        <h3>1.1 Classical interpretation</h3>
+        <p>
+          The <strong>classical</strong> or Laplacian view defines probability as the ratio of favorable outcomes to all equally possible outcomes:
+          <span class="math">\( P(A)=\frac{\#(\text{favorable outcomes})}{\#(\text{total outcomes})} \)</span>.
+          It is appropriate when the sample space is finite and outcomes are symmetric (e.g., ideal die or coin). Its limitation: it requires an objective notion of "equally likely" which is not always available.
+        </p>
+      </div>
+
+      <div class="info-box">
+        <h3>1.2 Frequentist interpretation</h3>
+        <p>
+          The <strong>frequentist</strong> view interprets probability as a limiting relative frequency: the probability of an event is the limit, as the number of trials → ∞, of the proportion of trials in which the event occurs.
+          It is operational and tied to repeatable experiments. Its limitation: the concept of a single-case probability (e.g. probability it will rain tomorrow) is awkward.
+        </p>
+      </div>
+
+      <div class="info-box">
+        <h3>1.3 Bayesian (subjective) interpretation</h3>
+        <p>
+          The <strong>Bayesian</strong> or subjective interpretation treats probability as a degree of belief, updated by Bayes' rule as new information arrives. It is flexible and suited for decision-making with uncertainty, but depends on the prior distribution which is sometimes controversial.
+        </p>
+      </div>
+
+      <div class="info-box">
+        <h3>1.4 Geometric / measure interpretations</h3>
+        <p>
+          In continuous contexts one often uses a <strong>geometric</strong> or measure-based view: probability is the ratio of measures (length, area, volume) of favorable sets to the measure of the sample space. This hints at the measure-theoretic framework.
+        </p>
+      </div>
+
+      <div class="info-box">
+        <h3>1.5 Propensity & other views</h3>
+        <p>
+          The <strong>propensity</strong> view assigns probability to a physical propensity or tendency of an experimental setup to produce an outcome. There are also operational/algorithmic perspectives (e.g., Kolmogorov complexity), but these are more specialized.
+        </p>
+      </div>
+
+      <p><strong>Summary:</strong> the different interpretations emphasize different uses—counting symmetry, long-run frequency, degrees of belief, or geometric measure. These views can appear inconsistent when taken as definitions; the axiomatic approach provides a unifying formal framework.</p>
+    </div>
+
+    <div class="card">
+      <h2>2. The axiomatic (Kolmogorov) approach — why it resolves inconsistencies</h2>
+      <p>
+        Kolmogorov's axioms define probability abstractly on a measurable space and separate <em>mathematical structure</em> from <em>interpretation</em>. The axioms are:
+      </p>
+
+      <div class="proof">
+        <ol>
+          <li>Let <span class="math">\((\Omega,\mathcal{F})\)</span> be a measurable space (sample space and σ-algebra).</li>
+          <li>Probability is a function <span class="math">\(P:\mathcal{F}\to[0,1]\)</span> satisfying:</li>
+          <ul>
+            <li><span class="math">\(P(\Omega)=1\)</span> (normalization).</li>
+            <li>For any sequence of disjoint events <span class="math">\(A_1,A_2,\dots\in\mathcal{F}\)</span>, <span class="math">\( P(\bigcup_{i=1}^\infty A_i)=\sum_{i=1}^\infty P(A_i) \)</span> (countable additivity).</li>
+            <li>From countable additivity and monotonicity follow other standard properties (non-negativity, finite additivity).</li>
+          </ul>
+        </ol>
+      </div>
+
+      <p>
+        These axioms are intentionally minimal and interpretation-agnostic: any of the interpretations (classical, frequentist, Bayesian, geometric) that produces a function satisfying these axioms is a valid probability model. Thus Kolmogorov does not replace interpretations but provides a <em>common language</em> — resolving apparent paradoxes by showing they often arise from misuse or ambiguity in the informal interpretation, not from mathematics.
+      </p>
+
+      <p>Examples of reconciliation:</p>
+      <ul>
+        <li><strong>Classical</strong>: equipprobable finite sample spaces produce P by counting; it satisfies Kolmogorov's axioms.</li>
+        <li><strong>Frequentist</strong>: limiting relative frequencies can define P on events generated by sequences, again satisfying the axioms in many constructions (via limiting measures).</li>
+        <li><strong>Bayesian</strong>: subjective priors are probability measures on the same measurable space; updating by Bayes' rule modifies measures but the axioms remain valid.</li>
+        <li><strong>Geometric</strong>: Lebesgue measure normalized on a region yields a probability measure satisfying axioms for continuous models.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>3. Probability theory ↔ Measure theory (core concepts)</h2>
+
+      <h3>3.1 σ-algebra (sigma-algebra)</h3>
+      <p>
+        A <strong>σ-algebra</strong> <span class="math">\(\mathcal{F}\)</span> on <span class="math">\(\Omega\)</span> is a collection of subsets of <span class="math">\(\Omega\)</span> such that:
+      </p>
+      <ul>
+        <li><span class="math">\(\Omega\in\mathcal{F}\)</span>.</li>
+        <li>If <span class="math">\(A\in\mathcal{F}\)</span> then <span class="math">\(A^c\in\mathcal{F}\)</span> (closed under complement).</li>
+        <li>Closed under countable unions: if <span class="math">\(A_i\in\mathcal{F}\)</span> then <span class="math">\(\bigcup_{i}A_i\in\mathcal{F}\)</span>.</li>
+      </ul>
+      <p>
+        The σ-algebra encodes the events for which probability is defined. In practice we often choose the Borel σ-algebra for real-valued variables.
+      </p>
+
+      <h3>3.2 Probability measure</h3>
+      <p>
+        A probability measure <span class="math">\(P\)</span> is a measure on <span class="math">\((\Omega,\mathcal{F})\)</span> with total mass 1. Measure theory supplies the tools to handle continuous sample spaces, limits, integration, and conditional expectations rigorously.
+      </p>
+
+      <h3>3.3 Measurable functions and random variables</h3>
+      <p>
+        A <strong>random variable</strong> is a measurable function <span class="math">\(X:(\Omega,\mathcal{F})\to(\mathbb{R},\mathcal{B})\)</span>, where <span class="math">\(\mathcal{B}\)</span> is the Borel σ-algebra on <span class="math">\(\mathbb{R}\)</span>. Measurability ensures that for any Borel set <span class="math">\(B\)</span>, the preimage <span class="math">\(X^{-1}(B)\in\mathcal{F}\)</span>, so its probability is defined.
+      </p>
+
+      <h3>3.4 Expectation as integral</h3>
+      <p>
+        The expectation of a non-negative measurable random variable is defined by the Lebesgue integral:
+        <span class="math">\( E[X]=\int_\Omega X(\omega)\,dP(\omega) \)</span>.
+        This generalizes discrete sums and continuous integrals, and is central to limit theorems (LLN, CLT) and conditional expectation.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>4. Derivations from the axioms</h2>
+
+      <h3>4.1 Monotonicity</h3>
+      <p>
+        If <span class="math">\(A\subseteq B\)</span> and both are in <span class="math">\(\mathcal{F}\)</span>, then
+        <span class="math">\(P(A)\le P(B)\)</span>.
+        <br>
+        <em>Proof:</em> Write <span class="math">\(B=A\cup(B\setminus A)\)</span> with disjoint terms, then by additivity
+        <span class="math">\(P(B)=P(A)+P(B\setminus A)\ge P(A)\)</span>.
+      </p>
+
+      <h3>4.2 Subadditivity (finite and countable)</h3>
+      <p>
+        <strong>Statement (finite):</strong> For events <span class="math">\(A_1,\dots,A_n\)</span>,
+        <br>
+        <span class="math">\( P(\bigcup_{i=1}^n A_i)\le \sum_{i=1}^n P(A_i) \)</span>.
+      </p>
+      <div class="proof">
+        <strong>Proof (finite):</strong>
+        <ol>
+          <li>Construct disjoint sets by sequentially removing previously counted parts:
+            <br>
+            <span class="math">\(B_1=A_1,\; B_2=A_2\setminus A_1,\; B_3=A_3\setminus(A_1\cup A_2),\;\dots\)</span>
+          </li>
+          <li>Then the union is disjoint: <span class="math">\(\bigcup_{i=1}^n A_i=\bigcup_{i=1}^n B_i\)</span>, and by finite additivity
+            <span class="math">\(P(\bigcup_{i=1}^n A_i)=\sum_{i=1}^n P(B_i)\)</span>.
+          </li>
+          <li>Since <span class="math">\(B_i\subseteq A_i\)</span>, monotonicity gives <span class="math">\(P(B_i)\le P(A_i)\)</span> for each <span class="math">\(i\)</span>. Summing yields the inequality.</li>
+        </ol>
+      </div>
+
+      <p>
+        <strong>Countable subadditivity:</strong> For countably many events,
+        <span class="math">\( P(\bigcup_{i=1}^\infty A_i)\le \sum_{i=1}^\infty P(A_i) \)</span>.
+        This follows by applying the finite argument to the first <span class="math">\(n\)</span> events and letting <span class="math">\(n\to\infty\)</span>, using continuity from below (an immediate consequence of countable additivity).
+      </p>
+
+      <h3>4.3 Inclusion–exclusion principle</h3>
+      <p>
+        <strong>Two-set identity (exact):</strong>
+        <br>
+        <span class="math">\( P(A\cup B)=P(A)+P(B)-P(A\cap B) \)</span>
+        <br>
+        <em>Derivation:</em> Decompose <span class="math">\(A\)</span> and <span class="math">\(B\)</span> into disjoint parts:
+        <br>
+        <span class="math">\(A=(A\setminus B)\cup(A\cap B),\quad B=(B\setminus A)\cup(A\cap B)\)</span>,
+        so
+        <br>
+        <span class="math">
+          \( P(A)+P(B)=P(A\setminus B)+P(A\cap B)+P(B\setminus A)+P(A\cap B) \)
+        </span>
+        <br>
+        and since <span class="math">\(A\cup B=(A\setminus B)\cup(A\cap B)\cup(B\setminus A)\)</span> (disjoint union), summing yields the two-set formula.
+      </p>
+
+      <p>
+        <strong>Three-set inclusion–exclusion:</strong>
+        <br>
+        <span class="math">
+          \( P(A\cup B\cup C)=P(A)+P(B)+P(C)
+          -P(A\cap B)-P(A\cap C)-P(B\cap C)
+          +P(A\cap B\cap C) \)
+        </span>
+      </p>
+
+      <div class="proof">
+        <strong>Sketch of general inclusion–exclusion (finite n):</strong>
+        <p>
+          The general formula for events <span class="math">\(A_1,\dots,A_n\)</span> is
+        </p>
+        <p class="math">
+          \(
+            P(\bigcup_{i=1}^n A_i)
+            = \sum_i P(A_i)
+            - \sum_{i&lt;j} P(A_i \cap A_j)
+            + \sum_{i&lt;j&lt;k} P(A_i \cap A_j \cap A_k)
+            - \cdots + (-1)^{n+1} P(A_1 \cap \cdots \cap A_n)
+          \)
+        </p>
+        <p>
+          The formula can be proved by counting how many times each outcome in the sample space is included in the right-hand side: an outcome that belongs to exactly <span class="math">\(m\)</span> of the events is counted
+          <span class="math">\( \binom{m}{1}-\binom{m}{2}+\binom{m}{3}-\cdots+(-1)^{m+1}\binom{m}{m}=1 \)</span>,
+          so it contributes exactly once—matching the left-hand side. This combinatorial identity (alternating sum of binomial coefficients) is the core of the proof.
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>5. Remarks, consequences and examples</h2>
+
+      <h3>5.1 Usefulness of subadditivity</h3>
+      <p>
+        Subadditivity provides an easy upper bound on probabilities of unions (e.g., Boole's inequality). It is often used to control error probabilities in multiple testing, to derive tail bounds, or to get a first crude bound when exact combinatorics are difficult.
+      </p>
+
+      <h3>5.2 Practical role of inclusion–exclusion</h3>
+      <p>
+        Inclusion–exclusion gives exact probabilities of unions but becomes computationally expensive for many events. It is useful when intersections of low orders dominate or when the number of events is small.
+      </p>
+
+      <h3>5.3 Why measure theory matters</h3>
+      <p>
+        Measure theory allows us to:
+        <ul>
+          <li>Handle continuous distributions and limits (important for CLT and LLN proofs).</li>
+          <li>Define integrals (expectation) robustly for arbitrary measurable functions.</li>
+          <li>Work with conditional expectation and martingales rigorously—essential tools of modern probability and statistics.</li>
+        </ul>
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>6. Short summary (takeaways)</h2>
+      <ul>
+        <li>The variety of probability interpretations reflect different practical needs; the Kolmogorov axioms supply a neutral, rigorous framework that all valid interpretations must satisfy.</li>
+        <li>Probability theory is a branch of measure theory: a probability is a measure with total mass 1 on a σ-algebra of events; random variables are measurable maps and expectations are integrals.</li>
+        <li>From the axioms we derive essential inequalities and identities—monotonicity, subadditivity (Boole's inequality), and inclusion–exclusion—tools central to both theoretical proofs and applied bounds.</li>
+      </ul>
+    </div>
+
+    <a class="back-button" href="../index.html">← Back</a>
+
+    <footer>
+      © 2025 Gabriele Paladini — All rights reserved.
+    </footer>
+  </div>
+</body>
+</html>
