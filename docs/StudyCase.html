@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Anomaly Detection Dashboard (Case study)</title>
+
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; }
+    header { padding: 18px 20px; border-bottom: 1px solid rgba(127,127,127,.35); }
+    main { padding: 16px 20px; max-width: 1100px; margin: 0 auto; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 980px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .card { border: 1px solid rgba(127,127,127,.35); border-radius: 16px; padding: 14px; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .row > * { margin: 0; }
+    label { font-size: 14px; opacity: .9; }
+    input[type="range"] { width: 220px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .small { font-size: 13px; opacity: .85; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid rgba(127,127,127,.35); padding: 8px 10px; text-align: center; }
+    th { font-weight: 600; }
+    .pill { display:inline-block; padding: 2px 10px; border-radius: 999px; border: 1px solid rgba(127,127,127,.35); }
+    .warn { color: #b45309; }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="row" style="justify-content: space-between;">
+    <div>
+      <h2 style="margin:0;">Dashboard — Statistical Anomaly Detection</h2>
+      <div class="small">Case study (Capitolo 5): rolling baseline, z-score, soglia \( \mu_t + k\sigma_t \), metriche.</div>
+    </div>
+    <div class="row">
+      <button id="btnDemo">Carica dataset demo</button>
+      <input id="fileInput" type="file" accept=".csv" />
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="row" style="justify-content: space-between;">
+      <div class="row">
+        <div>
+          <label>Finestra rolling (w): <span class="mono" id="wLabel">60</span></label><br/>
+          <input id="wRange" type="range" min="10" max="240" value="60" step="1" />
+        </div>
+        <div>
+          <label>Soglia (k): <span class="mono" id="kLabel">3.0</span></label><br/>
+          <input id="kRange" type="range" min="1" max="6" value="3" step="0.1" />
+        </div>
+        <div>
+          <label>Modalità</label><br/>
+          <select id="modeSel">
+            <option value="upper">Solo picchi (X_t &gt; μ_t + kσ_t)</option>
+            <option value="twoSided">Due code (|z| &gt; k)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <span class="pill">N campioni: <span class="mono" id="nLabel">0</span></span>
+        <span class="pill">Anomalie stimate: <span class="mono" id="aLabel">0</span></span>
+      </div>
+    </div>
+
+    <p class="small" style="margin-top:10px;">
+      <span class="warn">Nota:</span> se il CSV non ha la colonna <span class="mono">label</span>, le metriche non sono calcolabili (ma grafici e scoring sì).
+      Formato atteso: <span class="mono">t,value,label</span>.
+    </p>
+  </div>
+
+  <div class="grid" style="margin-top:14px;">
+    <div class="card">
+      <h3 style="margin-top:0;">Serie temporale e soglia dinamica</h3>
+      <div id="chart1" style="height:420px;"></div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;">Z-score nel tempo</h3>
+      <div id="chart2" style="height:420px;"></div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:14px;">
+    <div class="card">
+      <h3 style="margin-top:0;">Confusion matrix (se label presente)</h3>
+      <div id="cmBlock" class="small">Carica un CSV con colonna <span class="mono">label</span> per vedere TP/FP/TN/FN.</div>
+      <div id="cmTableWrap" style="margin-top:10px; display:none;">
+        <table>
+          <thead>
+            <tr><th></th><th>Pred: benign</th><th>Pred: attack</th></tr>
+          </thead>
+          <tbody>
+            <tr><th>True: benign</th><td id="tn">-</td><td id="fp">-</td></tr>
+            <tr><th>True: attack</th><td id="fn">-</td><td id="tp">-</td></tr>
+          </tbody>
+        </table>
+
+        <div class="row" style="margin-top:10px;">
+          <span class="pill">Precision: <span class="mono" id="prec">-</span></span>
+          <span class="pill">Recall: <span class="mono" id="rec">-</span></span>
+          <span class="pill">F1: <span class="mono" id="f1">-</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0;">Come si collega alle formule del Capitolo 5</h3>
+      <p class="small">
+        La dashboard calcola una baseline mobile con finestra <span class="mono">w</span>:
+        <span class="mono">μ_t</span> (media) e <span class="mono">σ_t</span> (dev. std) sui valori precedenti.
+        Poi genera allarmi con soglia <span class="mono">μ_t + kσ_t</span> (modalità “solo picchi”)
+        oppure con <span class="mono">|z| &gt; k</span> (due code), dove
+        <span class="mono">z = (X_t − μ_t) / σ_t</span>.
+      </p>
+      <p class="small">
+        Se nel CSV è presente la colonna <span class="mono">label</span>, la dashboard confronta le anomalie stimate
+        con la ground truth e calcola TP/FP/TN/FN e le metriche (precision, recall, F1).
+      </p>
+    </div>
+  </div>
+</main>
+
+<script>
+  function mean(arr) {
+    if (!arr.length) return NaN;
+    let s = 0;
+    for (const v of arr) s += v;
+    return s / arr.length;
+  }
+  function std(arr) {
+    if (arr.length < 2) return NaN;
+    const m = mean(arr);
+    let s2 = 0;
+    for (const v of arr) s2 += (v - m) * (v - m);
+    return Math.sqrt(s2 / arr.length);
+  }
+
+  function rollingStats(values, w) {
+    const mu = new Array(values.length).fill(null);
+    const sig = new Array(values.length).fill(null);
+    for (let t = 0; t < values.length; t++) {
+      const start = Math.max(0, t - w);
+      const window = values.slice(start, t);
+      if (window.length >= 2) {
+        mu[t] = mean(window);
+        sig[t] = std(window);
+      }
+    }
+    return { mu, sig };
+  }
+
+  function safeNum(x) {
+    const n = Number(x);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function generateDemo(n=600) {
+    const t = [];
+    const value = [];
+    const label = [];
+    for (let i = 0; i < n; i++) {
+      t.push(i);
+      const daily = 8 * Math.sin(i / 40);
+      let v = 100 + daily + (Math.random() * 10 - 5);
+
+      const isAttack =
+        (i > 160 && i < 200) ||
+        (i > 330 && i < 350) ||
+        (i > 460 && i < 520);
+
+      if (isAttack) v += 35 + Math.random() * 25;
+      value.push(v);
+      label.push(isAttack ? 1 : 0);
+    }
+    return { t, value, label };
+  }
+
+  let data = null;
+
+  const wRange = document.getElementById("wRange");
+  const kRange = document.getElementById("kRange");
+  const wLabel = document.getElementById("wLabel");
+  const kLabel = document.getElementById("kLabel");
+  const modeSel = document.getElementById("modeSel");
+
+  function computeAndRender() {
+    if (!data) return;
+
+    const w = Number(wRange.value);
+    const k = Number(kRange.value);
+    const mode = modeSel.value;
+    wLabel.textContent = String(w);
+    kLabel.textContent = k.toFixed(1);
+
+    const { t, value, label } = data;
+
+    const { mu, sig } = rollingStats(value, w);
+    const thr = mu.map((m, i) => (m != null && sig[i] != null) ? m + k * sig[i] : null);
+
+    const z = value.map((x, i) => {
+      if (mu[i] == null || sig[i] == null || sig[i] === 0) return null;
+      return (x - mu[i]) / sig[i];
+    });
+
+    const pred = value.map((x, i) => {
+      if (mu[i] == null || sig[i] == null || sig[i] === 0) return 0;
+      if (mode === "upper") return (x > (mu[i] + k * sig[i])) ? 1 : 0;
+      const zi = z[i];
+      return (zi != null && Math.abs(zi) > k) ? 1 : 0;
+    });
+
+    document.getElementById("nLabel").textContent = String(value.length);
+    document.getElementById("aLabel").textContent = String(pred.reduce((a,b)=>a+b,0));
+
+    const anomalyX = [];
+    const anomalyT = [];
+    for (let i = 0; i < pred.length; i++) {
+      if (pred[i] === 1) {
+        anomalyT.push(t[i]);
+        anomalyX.push(value[i]);
+      }
+    }
+
+    Plotly.newPlot("chart1", [
+      { x: t, y: value, mode: "lines", name: "X_t (feature)" },
+      { x: t, y: mu, mode: "lines", name: "μ_t (rolling mean)" },
+      { x: t, y: thr, mode: "lines", name: "μ_t + kσ_t (threshold)" },
+      { x: anomalyT, y: anomalyX, mode: "markers", name: "Anomalie (pred)", marker: { size: 7 } }
+    ], {
+      margin: { l: 45, r: 10, t: 20, b: 40 },
+      xaxis: { title: "t" },
+      yaxis: { title: "value" },
+      legend: { orientation: "h" }
+    }, { responsive: true });
+
+    const kLine = t.map(() => k);
+    const minusKLine = t.map(() => -k);
+    Plotly.newPlot("chart2", [
+      { x: t, y: z, mode: "lines", name: "z_t" },
+      { x: t, y: kLine, mode: "lines", name: "+k" },
+      { x: t, y: minusKLine, mode: "lines", name: "−k" }
+    ], {
+      margin: { l: 45, r: 10, t: 20, b: 40 },
+      xaxis: { title: "t" },
+      yaxis: { title: "z-score" },
+      legend: { orientation: "h" }
+    }, { responsive: true });
+
+    const hasLabels = Array.isArray(label) && label.some(v => v === 0 || v === 1);
+    const cmBlock = document.getElementById("cmBlock");
+    const cmWrap = document.getElementById("cmTableWrap");
+
+    if (!hasLabels) {
+      cmWrap.style.display = "none";
+      cmBlock.style.display = "block";
+      cmBlock.innerHTML = 'Carica un CSV con colonna <span class="mono">label</span> (0/1) per vedere TP/FP/TN/FN.';
+      return;
+    }
+
+    let TP=0, FP=0, TN=0, FN=0;
+    for (let i = 0; i < pred.length; i++) {
+      const y = label[i];
+      const p = pred[i];
+      if (y === 1 && p === 1) TP++;
+      else if (y === 0 && p === 1) FP++;
+      else if (y === 0 && p === 0) TN++;
+      else if (y === 1 && p === 0) FN++;
+    }
+
+    const precision = (TP + FP) ? TP / (TP + FP) : 0;
+    const recall = (TP + FN) ? TP / (TP + FN) : 0;
+    const f1 = (precision + recall) ? 2 * (precision * recall) / (precision + recall) : 0;
+
+    document.getElementById("tp").textContent = TP;
+    document.getElementById("fp").textContent = FP;
+    document.getElementById("tn").textContent = TN;
+    document.getElementById("fn").textContent = FN;
+    document.getElementById("prec").textContent = precision.toFixed(3);
+    document.getElementById("rec").textContent = recall.toFixed(3);
+    document.getElementById("f1").textContent = f1.toFixed(3);
+
+    cmBlock.style.display = "none";
+    cmWrap.style.display = "block";
+  }
+
+  function loadFromCSVFile(file) {
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (res) => {
+        const rows = res.data;
+        const t = [];
+        const value = [];
+        const label = [];
+        let hasLabel = false;
+
+        for (const r of rows) {
+          const ti = (r.t ?? r.time ?? r.timestamp);
+          const vi = (r.value ?? r.x ?? r.feature);
+          const li = (r.label ?? r.y);
+
+          const tn = safeNum(ti);
+          const vn = safeNum(vi);
+          if (tn == null || vn == null) continue;
+
+          t.push(tn);
+          value.push(vn);
+
+          const ln = safeNum(li);
+          if (ln === 0 || ln === 1) {
+            label.push(ln);
+            hasLabel = true;
+          } else {
+            label.push(null);
+          }
+        }
+
+        data = { t, value, label: hasLabel ? label.map(v => v ?? 0) : null };
+        computeAndRender();
+      }
+    });
+  }
+
+  document.getElementById("btnDemo").addEventListener("click", () => {
+    data = generateDemo();
+    computeAndRender();
+  });
+
+  document.getElementById("fileInput").addEventListener("change", (e) => {
+    const file = e.target.files?.[0];
+    if (file) loadFromCSVFile(file);
+  });
+
+  wRange.addEventListener("input", computeAndRender);
+  kRange.addEventListener("input", computeAndRender);
+  modeSel.addEventListener("change", computeAndRender);
+
+  data = generateDemo();
+  computeAndRender();
+</script>
+</body>
+</html>
